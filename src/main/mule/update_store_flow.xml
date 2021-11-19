@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="update_store_flowFlow" doc:id="15782c0f-9a06-4115-90e6-5e26999eca28" >
+		<os:retrieve doc:name="Retrieve" doc:id="fea12598-ac7c-4ab4-abf6-41059c93f6d5" key="#[payload.correlationId]" objectStore="Object_store"/>
+		<ee:transform doc:name="Transform Message" doc:id="7b2af3b6-75be-48ff-b360-6b2134ee7c0e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="nodays" ><![CDATA[(now() as DateTime -payload.lastUpdatedDateTime).days as Number]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="681b36d3-84e1-420c-a9e1-e0609229f638" >
+			<when expression="#[vars.nodays &gt;= 25]">
+				<os:store doc:name="Store" doc:id="e0bd9c8b-ae01-4f93-adcf-ef82667fd182" key="#[vars.correlationId]" objectStore="Object_store"/>
+				<ee:transform doc:name="Transform Message" doc:id="ac9da203-a7ca-4353-9f2e-b90f3963f38f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"successfully updated object store"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<set-variable value="400" doc:name="Set Variable" doc:id="1a1b6201-3988-4851-89e7-21934019aee0" variableName="httpstatus"/>
+				<ee:transform doc:name="Transform Message" doc:id="99013981-10b8-40ef-a2cd-39cf0a502799" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": " it is not completed 25 days"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

@@ -1,0 +1,8 @@
+{
+  "correlationId":"1234",
+  "firstname":"ABC",
+  "lastname":"XYZ",
+  "description":"provided the admin access",
+  "status":"success",
+  "ticketNumber": "SC_001"
+}

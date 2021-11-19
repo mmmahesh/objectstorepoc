@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="retrieve_flowFlow" doc:id="9d2da545-2efa-42f6-9e1d-1c82c904739a" >
+		<set-variable value="#[attributes.queryParams.correlationId]" doc:name="Set Variable" doc:id="abb4f7de-c6d1-4742-9489-dcce070b6527" variableName="correlationId"/>
+		<os:retrieve doc:name="Retrieve" doc:id="aa516128-e5f7-4695-a9f5-5687658ef061" key="#[vars.correlationId]" objectStore="Object_store"/>
+		<ee:transform doc:name="Transform Message" doc:id="202be5d6-abb2-42c0-9d88-62051d7c1479" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

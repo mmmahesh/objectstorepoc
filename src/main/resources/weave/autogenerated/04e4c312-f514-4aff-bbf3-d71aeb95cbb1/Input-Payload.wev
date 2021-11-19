@@ -1,0 +1,12 @@
+%dw 2.0
+
+type auto_04e4c312_f514_4aff_bbf3_d71aeb95cbb1_Input_Payload = {
+  ticketNumber?: String, 
+  firstname?: String, 
+  description?: String, 
+  correlationId: String, 
+  lastname?: String, 
+  status?: String, 
+  _?: Any
+}
+

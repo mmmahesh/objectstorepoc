@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="post_store_flowFlow" doc:id="04e4c312-f514-4aff-bbf3-d71aeb95cbb1" >
+		<set-variable value="#[payload.correlationId]" doc:name="Set Variable" doc:id="5aa962bc-e266-4778-80e2-fa540b44f2c6" variableName="correlationId"/>
+		<ee:transform doc:name="Transform Message" doc:id="fbcfbc3a-d527-4083-8e48-7df059e3fa8e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"correlationId": payload.correlationId,
+	"firstname": payload.firstname,
+	"lastname": payload.lastname,
+	"description": payload.description,
+	"status": payload.status,
+	"ticketNumber": payload.ticketNumber,
+	"lastUpdatedDateTime": now() as DateTime
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<os:store doc:name="Store" doc:id="79485402-6613-405f-802f-61640bc58e7a" key="#[vars.correlationId]" objectStore="Object_store"/>
+		<ee:transform doc:name="Transform Message" doc:id="64e6b3b2-8ddb-4809-8ff4-ad2756d8831a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"successfully stored data into the object store"
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

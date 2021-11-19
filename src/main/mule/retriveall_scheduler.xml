@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="retriveall_schedulerFlow" doc:id="afb6de10-3cd4-4d22-9ef5-4df89efba3d6" >
+		<scheduler doc:name="Scheduler" doc:id="78828bc8-47a2-4b59-9eae-e9c981cc20eb" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="2" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<os:retrieve-all doc:name="Retrieve all" doc:id="c212f0e4-694c-4bb8-b5f9-8a9f12befec2" objectStore="Object_store"/>
+		<ee:transform doc:name="Transform Message" doc:id="5fbab5d9-1001-4b88-bade-456798bf9bf5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="171955e2-25f7-4307-9d51-3f5e8e049c20" />
+		<ee:transform doc:name="Transform Message" doc:id="f578a24b-8116-4fff-a134-ca22a66351a9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+valuesof(payload) map ((item,index) ->
+	read(payload[index],"application/json")) filter((item,index) -> (now() as DateTime - item.lastUpdatedDateTime).days as Number >= 25)
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="348f4fae-4448-432a-9dac-8f4f2dcf7863" >
+			<ee:transform doc:name="Transform Message" doc:id="6c6a3353-c9e6-4679-b076-bd682cc26fa5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload mapobject((item,index) ->{
+	"correlationId": payload.correlationId,
+	"firstName": payload.firstName,
+	"lastName": payload.lastName,
+	"description": payload.description,
+	"status": payload.status,
+	"ticketNumber": payload.ticketNumber,
+	"lastUpdatedDateTime": now() as DateTime
+	
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<os:store doc:name="Store" doc:id="fefe9d1d-07cd-4eca-b236-f076d7baf996" key="#[payload.correlationId]" objectStore="Object_store"/>
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="29fdb7f6-1c83-4b8f-8796-824f6ca02efc" message="printing of payload"/>
+	</flow>
+</mule>
